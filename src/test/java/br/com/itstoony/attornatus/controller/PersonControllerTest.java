@@ -3,6 +3,7 @@ package br.com.itstoony.attornatus.controller;
 import br.com.itstoony.attornatus.dto.PersonDTO;
 import br.com.itstoony.attornatus.model.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +42,9 @@ public class PersonControllerTest {
 
         Person savedPerson = createPerson();
 
-        String json = new ObjectMapper().writeValueAsString(personDTO);
+        String json = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValueAsString(personDTO);
 
         // execution
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
