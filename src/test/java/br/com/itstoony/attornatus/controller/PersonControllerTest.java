@@ -1,5 +1,6 @@
 package br.com.itstoony.attornatus.controller;
 
+import br.com.itstoony.attornatus.dto.AddressRecord;
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
 import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
 import br.com.itstoony.attornatus.model.Address;
@@ -260,6 +261,69 @@ public class PersonControllerTest {
                 .andExpect( jsonPath("totalElements").value(1))
                 .andExpect( jsonPath("pageable.pageSize").value(10))
                 .andExpect( jsonPath("pageable.pageNumber").value(0));
+    }
+
+    @Test
+    @DisplayName("Should add an address to a persons set")
+    public void addAddressTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        Address address = createAddress();
+        AddressRecord addressRecord = new AddressRecord(createAddress().getZipcode(), createAddress().getNumber());
+
+        Person updatedPerson = createPerson();
+        updatedPerson.setId(id);
+        updatedPerson.getAddressSet().add(address);
+
+        String json = new ObjectMapper().writeValueAsString(addressRecord);
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.of(person));
+        BDDMockito.given(personService.addAddress(Mockito.any(Person.class), Mockito.any(Address.class)))
+                .willReturn(updatedPerson);
+        BDDMockito.given(addressService.findByZipcode(addressRecord.zipcode())).willReturn(address);
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post(PERSON_API.concat("/" + id + "/address"))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("name").value(person.getName()))
+                .andExpect(jsonPath("birthDay").value(person.getBirthDay().toString()))
+                .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
+                .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].zipcode").value(addressRecord.zipcode()))
+                .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
+    }
+
+    @Test
+    @DisplayName("Should return Bad Request when trying to add address with insufficient data")
+    public void addAddressInvalidRecordTest() throws Exception {
+        long id = 1L;
+        AddressRecord addressRecord = new AddressRecord("", null);
+
+        String json = new ObjectMapper().writeValueAsString(addressRecord);
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .post(PERSON_API.concat("/" + id + "/address"))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", hasSize(3)));
     }
 
     private static Address createAddress() {

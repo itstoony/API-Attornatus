@@ -28,4 +28,8 @@ public class PersonService {
     public Page<Person> find(String name, Pageable pageable) {
         return null;
     }
+
+    public Person addAddress(Person person, Address address) {
+        return null;
+    }
 }
