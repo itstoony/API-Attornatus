@@ -2,6 +2,7 @@ package br.com.itstoony.attornatus.controller;
 
 import br.com.itstoony.attornatus.dto.PersonDTO;
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
+import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.service.AddressService;
@@ -48,6 +49,18 @@ public class PersonController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
 
         return ResponseEntity.ok(modelMapper.map(foundPerson, PersonDTO.class));
+    }
+
+    @PutMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PersonDTO> update(@PathVariable(name = "id") Long id,
+                                            @RequestBody UpdatingPersonRecord update) {
+        Person person = personService
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
+
+        Person updatedPerson = personService.update(person, update);
+
+        return ResponseEntity.ok(modelMapper.map(updatedPerson, PersonDTO.class));
     }
 
 }

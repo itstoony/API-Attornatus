@@ -1,7 +1,7 @@
 package br.com.itstoony.attornatus.controller;
 
-import br.com.itstoony.attornatus.dto.PersonDTO;
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
+import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.service.AddressService;
@@ -88,7 +88,6 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
-
     }
 
     @Test
@@ -144,7 +143,6 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
-
     }
 
     @Test
@@ -159,6 +157,72 @@ public class PersonControllerTest {
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
                 .get(PERSON_API.concat("/" + id))
                 .accept(MediaType.APPLICATION_JSON);
+
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should update a person")
+    public void updateTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        person.setId(id);
+        UpdatingPersonRecord update = new UpdatingPersonRecord("Sicrano", LocalDate.of(2000, 2, 7));
+        Address address = createAddress();
+
+        Person updatedPerson = new Person(id, update.name(), update.birthDay(), new HashSet<>());
+        updatedPerson.getAddressSet().add(address);
+
+        String json = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValueAsString(update);
+
+        BDDMockito.given( personService.findById(id)).willReturn(Optional.of(person) );
+        BDDMockito.given( personService.update(Mockito.any(Person.class), Mockito.any(UpdatingPersonRecord.class)) ).willReturn(updatedPerson);
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(PERSON_API.concat("/" + id))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("name").value(update.name()))
+                .andExpect(jsonPath("birthDay").value(update.birthDay().toString()))
+                .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
+                .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when trying to update a person by an invalid ID")
+    public void updateInvalidIDTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        String json = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValueAsString(new UpdatingPersonRecord("name", LocalDate.now()));
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.empty());
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(PERSON_API.concat("/" + id))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
 
 
         // validation
@@ -183,14 +247,6 @@ public class PersonControllerTest {
                 .id(1L)
                 .name("Fulano")
                 .birthDay(LocalDate.of(1998, 11, 25))
-                .addressSet(new HashSet<>())
-                .build();
-    }
-
-    private static PersonDTO createPersonDTO() {
-        return PersonDTO.builder()
-                .name("Fulano")
-                .birthDay(LocalDate.of(1998, 11, 25 ))
                 .addressSet(new HashSet<>())
                 .build();
     }
