@@ -1,9 +1,7 @@
 package br.com.itstoony.attornatus.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import br.com.itstoony.attornatus.model.Address;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -12,6 +10,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 public class PersonDTO {
 
     private Long id;
@@ -20,6 +19,6 @@ public class PersonDTO {
 
     private LocalDate birthDay;
 
-    private Set<AddressDTO> addressSet;
+    private Set<Address> addressSet;
 
 }
