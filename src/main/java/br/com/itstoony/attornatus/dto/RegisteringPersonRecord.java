@@ -7,7 +7,10 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public record RegisteringPersonRecord(
-     @NotEmpty(message = "Name must not be empty") String name,
-     @NotNull(message = "Birthday must not be null")  LocalDate birthDay,
-     @NotEmpty @Pattern(regexp = "\\d{5}\\d{3}", message = "must be in 'CEP' pattern '99999999'") String zipcode
+     @NotEmpty(message = "Name must not be empty")
+     String name,
+     @NotNull(message = "Birthday must not be null")
+     LocalDate birthDay,
+     @NotEmpty @Pattern(regexp = "\\d{5}\\d{3}", message = "must be in 'CEP' pattern '99999999'")
+     String zipcode
 ) { }
