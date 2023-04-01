@@ -4,6 +4,8 @@ import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
 import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,6 +22,10 @@ public class PersonService {
     }
 
     public Person update(Person person, UpdatingPersonRecord update) {
+        return null;
+    }
+
+    public Page<Person> find(String name, Pageable pageable) {
         return null;
     }
 }

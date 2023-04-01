@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -231,6 +234,33 @@ public class PersonControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    @DisplayName("Should find and return a page of people by params")
+    public void findTest() throws Exception {
+        // scenery
+        Person person = createPerson();
+
+        BDDMockito.given( personService.find(Mockito.any(String.class), Mockito.any(Pageable.class)) )
+                .willReturn(new PageImpl<>(Collections.singletonList(person), Pageable.ofSize(100), 1) );
+
+        String queryString = String.format("?name=%s&page=0&size=10",
+                person.getName());
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat(queryString))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect( jsonPath("content", hasSize(1)))
+                .andExpect( jsonPath("content.[0].name").value(person.getName()))
+                .andExpect( jsonPath("totalElements").value(1))
+                .andExpect( jsonPath("pageable.pageSize").value(10))
+                .andExpect( jsonPath("pageable.pageNumber").value(0));
+    }
 
     private static Address createAddress() {
         return Address.builder()
