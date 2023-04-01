@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -114,6 +115,59 @@ public class PersonControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors", hasSize(4)));
     }
+
+    @Test
+    @DisplayName("Should find a person by it's ID")
+    public void findByIDTest() throws Exception {
+        // scenery
+        Person person = createPerson();
+        Address address = createAddress();
+        person.getAddressSet().add(address);
+        Long id = 1L;
+        person.setId(id);
+
+        BDDMockito.given( personService.findById(Mockito.anyLong()) ).willReturn(Optional.of(person));
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("name").value(person.getName()))
+                .andExpect(jsonPath("birthDay").value(person.getBirthDay().toString()))
+                .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
+                .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
+
+    }
+
+    @Test
+    @DisplayName("Should return 404 not found when trying to find a person by an invalid ID")
+    public void findByInvalidIDTest() throws Exception {
+        // scenery
+        Long id = 1L;
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.empty());
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isNotFound());
+    }
+
 
     private static Address createAddress() {
         return Address.builder()

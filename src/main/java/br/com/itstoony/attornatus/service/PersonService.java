@@ -5,6 +5,8 @@ import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class PersonService {
 
@@ -12,4 +14,7 @@ public class PersonService {
         return null;
     }
 
+    public Optional<Person> findById(Long id) {
+        return Optional.empty();
+    }
 }

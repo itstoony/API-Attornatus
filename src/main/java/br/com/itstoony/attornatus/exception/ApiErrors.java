@@ -1,6 +1,5 @@
 package br.com.itstoony.attornatus.exception;
 
-import lombok.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.server.ResponseStatusException;
 
