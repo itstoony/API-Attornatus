@@ -1,5 +1,6 @@
 package br.com.itstoony.attornatus.controller;
 
+import br.com.itstoony.attornatus.dto.AddressRecord;
 import br.com.itstoony.attornatus.dto.PersonDTO;
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
 import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
@@ -76,6 +77,27 @@ public class PersonController {
         PageImpl<PersonDTO> pageDTO = new PageImpl<>(listDTO, pageable, page.getTotalElements());
 
         return ResponseEntity.ok(pageDTO);
+    }
+
+    @PostMapping("{id}/address")
+    public ResponseEntity<PersonDTO> addAddress(@PathVariable(name = "id") Long id,
+                                              @RequestBody @Valid AddressRecord dto) {
+
+        Person person = personService
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
+        Address address = addressService.findByZipcode(dto.zipcode());
+
+        Person updatedPerson = personService.addAddress(person, address);
+
+        return ResponseEntity.ok(modelMapper.map(updatedPerson, PersonDTO.class));
+    }
+
+    @GetMapping("{id}/address")
+    public ResponseEntity<Page<Address>> listAllAddress(@PathVariable(name = "id") Long id,
+                                                        Pageable pageable) {
+        Person person = personService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
+        return ResponseEntity.ok(personService.findAllAddress(person, pageable));
     }
 
 }
