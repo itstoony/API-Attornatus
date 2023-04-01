@@ -1,13 +1,12 @@
 package br.com.itstoony.attornatus.controller;
 
-import br.com.itstoony.attornatus.dto.PersonDTO;
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
+import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.service.AddressService;
 import br.com.itstoony.attornatus.service.PersonService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -26,7 +27,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -88,7 +91,6 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
-
     }
 
     @Test
@@ -115,6 +117,151 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("errors", hasSize(4)));
     }
 
+    @Test
+    @DisplayName("Should find a person by it's ID")
+    public void findByIDTest() throws Exception {
+        // scenery
+        Person person = createPerson();
+        Address address = createAddress();
+        person.getAddressSet().add(address);
+        Long id = 1L;
+        person.setId(id);
+
+        BDDMockito.given( personService.findById(Mockito.anyLong()) ).willReturn(Optional.of(person));
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("name").value(person.getName()))
+                .andExpect(jsonPath("birthDay").value(person.getBirthDay().toString()))
+                .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
+                .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
+    }
+
+    @Test
+    @DisplayName("Should return 404 not found when trying to find a person by an invalid ID")
+    public void findByInvalidIDTest() throws Exception {
+        // scenery
+        Long id = 1L;
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.empty());
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat("/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should update a person")
+    public void updateTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        person.setId(id);
+        UpdatingPersonRecord update = new UpdatingPersonRecord("Sicrano", LocalDate.of(2000, 2, 7));
+        Address address = createAddress();
+
+        Person updatedPerson = new Person(id, update.name(), update.birthDay(), new HashSet<>());
+        updatedPerson.getAddressSet().add(address);
+
+        String json = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValueAsString(update);
+
+        BDDMockito.given( personService.findById(id)).willReturn(Optional.of(person) );
+        BDDMockito.given( personService.update(Mockito.any(Person.class), Mockito.any(UpdatingPersonRecord.class)) ).willReturn(updatedPerson);
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(PERSON_API.concat("/" + id))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("name").value(update.name()))
+                .andExpect(jsonPath("birthDay").value(update.birthDay().toString()))
+                .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
+                .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when trying to update a person by an invalid ID")
+    public void updateInvalidIDTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        String json = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValueAsString(new UpdatingPersonRecord("name", LocalDate.now()));
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.empty());
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(PERSON_API.concat("/" + id))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should find and return a page of people by params")
+    public void findTest() throws Exception {
+        // scenery
+        Person person = createPerson();
+
+        BDDMockito.given( personService.find(Mockito.any(String.class), Mockito.any(Pageable.class)) )
+                .willReturn(new PageImpl<>(Collections.singletonList(person), Pageable.ofSize(100), 1) );
+
+        String queryString = String.format("?name=%s&page=0&size=10",
+                person.getName());
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat(queryString))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect( jsonPath("content", hasSize(1)))
+                .andExpect( jsonPath("content.[0].name").value(person.getName()))
+                .andExpect( jsonPath("totalElements").value(1))
+                .andExpect( jsonPath("pageable.pageSize").value(10))
+                .andExpect( jsonPath("pageable.pageNumber").value(0));
+    }
+
     private static Address createAddress() {
         return Address.builder()
                 .id(1L)
@@ -130,14 +277,6 @@ public class PersonControllerTest {
                 .id(1L)
                 .name("Fulano")
                 .birthDay(LocalDate.of(1998, 11, 25))
-                .addressSet(new HashSet<>())
-                .build();
-    }
-
-    private static PersonDTO createPersonDTO() {
-        return PersonDTO.builder()
-                .name("Fulano")
-                .birthDay(LocalDate.of(1998, 11, 25 ))
                 .addressSet(new HashSet<>())
                 .build();
     }
