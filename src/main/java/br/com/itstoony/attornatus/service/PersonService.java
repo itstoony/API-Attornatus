@@ -32,4 +32,8 @@ public class PersonService {
     public Person addAddress(Person person, Address address) {
         return null;
     }
+
+    public Page<Address> findAllAddress(Person person, Pageable pageable) {
+        return null;
+    }
 }

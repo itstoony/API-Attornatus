@@ -326,6 +326,42 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("errors", hasSize(3)));
     }
 
+    @Test
+    @DisplayName("Should return a page with all addresses from a person by it's id")
+    public void findAllAddressTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        Address address = createAddress();
+
+        Person updatedPerson = createPerson();
+        updatedPerson.setId(id);
+        updatedPerson.getAddressSet().add(address);
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.of(person));
+        BDDMockito.given(personService.findAllAddress(Mockito.any(Person.class), Mockito.any(Pageable.class)))
+                .willReturn(new PageImpl<>(Collections.singletonList(address), Pageable.ofSize(100), 1));
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .get(PERSON_API.concat("/" + id + "/address?page=0&size=10"))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // implementation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect( jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content[0].id").value(address.getId()))
+                .andExpect(jsonPath("content[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("content[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("content[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("content[0].city").value(address.getCity()))
+                .andExpect( jsonPath("totalElements").value(1))
+                .andExpect( jsonPath("pageable.pageSize").value(100))
+                .andExpect( jsonPath("pageable.pageNumber").value(0));
+
+    }
+
     private static Address createAddress() {
         return Address.builder()
                 .id(1L)

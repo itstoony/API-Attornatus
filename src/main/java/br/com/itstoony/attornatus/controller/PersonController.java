@@ -93,4 +93,11 @@ public class PersonController {
         return ResponseEntity.ok(modelMapper.map(updatedPerson, PersonDTO.class));
     }
 
+    @GetMapping("{id}/address")
+    public ResponseEntity<Page<Address>> listAllAddress(@PathVariable(name = "id") Long id,
+                                                        Pageable pageable) {
+        Person person = personService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
+        return ResponseEntity.ok(personService.findAllAddress(person, pageable));
+    }
+
 }
