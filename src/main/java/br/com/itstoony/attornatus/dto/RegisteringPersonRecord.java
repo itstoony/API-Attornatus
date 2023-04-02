@@ -11,6 +11,10 @@ public record RegisteringPersonRecord(
      String name,
      @NotNull(message = "Birthday must not be null")
      LocalDate birthDay,
-     @NotEmpty @Pattern(regexp = "\\d{5}\\d{3}", message = "must be in 'CEP' pattern '99999999'")
-     String zipcode
+     @NotEmpty(message = "zipcode must not be empty")
+     @Pattern(regexp = "\\d{5}\\d{3}", message = "must be in 'CEP' pattern '99999999'")
+     String zipcode,
+     @NotNull(message = "Number must not be null")
+     Integer number
+
 ) { }
