@@ -64,11 +64,8 @@ public class AddressService {
         return addressRepository.findByPerson(person, pageable);
     }
 
-    public Person setAddressAsMain(Address address) {
-        return null;
-    }
 
     public Optional<Address> findById(Long id) {
-        return Optional.empty();
+        return addressRepository.findById(id);
     }
 }

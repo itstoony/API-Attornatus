@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -86,6 +87,45 @@ public class AddressServiceTest {
     }
 
     @Test
+    @DisplayName("Should return an Address by it's ID")
+    public void findByIDTest() {
+        // scenery
+        Long id = 1L;
+        Address address = createAddress();
+        address.setId(id);
+
+        when(addressRepository.findById(id)).thenReturn(Optional.of(address));
+
+        // execution
+        Optional<Address> found = addressService.findById(id);
+
+        // validation
+        assertThat(found.isPresent()).isTrue();
+        assertThat(found.get().getId()).isEqualTo(id);
+        assertThat(found.get().getStreet()).isEqualTo(address.getStreet());
+        assertThat(found.get().getZipcode()).isEqualTo(address.getZipcode());
+        assertThat(found.get().getNumber()).isEqualTo(address.getNumber());
+        assertThat(found.get().getCity()).isEqualTo(address.getCity());
+        assertThat(found.get().getMain()).isEqualTo(address.getMain());
+
+    }
+
+    @Test
+    @DisplayName("Should return an empty optional when trying to find address by invalid id")
+    public void findByInvalidIDTest() {
+        // scenery
+        Long id = 1L;
+
+        when(addressRepository.findById(id)).thenReturn(Optional.empty());
+
+        // execution
+        Optional<Address> found = addressService.findById(id);
+
+        // validation
+        assertThat(found.isEmpty()).isTrue();
+
+    }
+    @Test
     @DisplayName("Should return a page of all addresses from a person")
     public void findAllAddressTest() {
         // scenery
@@ -108,6 +148,7 @@ public class AddressServiceTest {
         assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
         assertThat(result.getPageable().getPageSize()).isEqualTo(10);
     }
+
 
     private static Person createPerson() {
         return Person.builder()
