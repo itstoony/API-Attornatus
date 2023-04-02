@@ -99,7 +99,7 @@ public class PersonControllerTest {
     @DisplayName("Should return 400 Bad Request when trying to register a person without sufficient data")
     public void registerInvalidPersonTest() throws Exception {
         // scenery
-        RegisteringPersonRecord dto = new RegisteringPersonRecord("", null, "");
+        RegisteringPersonRecord dto = new RegisteringPersonRecord("", null, "", 10);
 
         String json = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
@@ -445,6 +445,6 @@ public class PersonControllerTest {
     }
 
     private static RegisteringPersonRecord createRegisteringPersonDTO() {
-        return new RegisteringPersonRecord("Fulano", LocalDate.of(1998, 11, 25), "22222222" );
+        return new RegisteringPersonRecord("Fulano", LocalDate.of(1998, 11, 25), "22222222", 10 );
     }
 }
