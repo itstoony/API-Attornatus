@@ -81,7 +81,7 @@ public class PersonService {
     }
 
     public Page<Address> findAllAddress(Person person, Pageable pageable) {
-        return null;
+        return addressRepository.findByPerson(person, pageable);
     }
 
     public Person setAddressAsMain(Person person, Address address) {
