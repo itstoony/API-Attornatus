@@ -90,6 +90,7 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
                 .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
                 .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].main").value(address.getMain()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
     }
@@ -145,6 +146,7 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
                 .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
                 .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].main").value(address.getMain()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
     }
@@ -207,6 +209,7 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
                 .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
                 .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].main").value(address.getMain()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
     }
@@ -300,6 +303,7 @@ public class PersonControllerTest {
                 .andExpect(jsonPath("birthDay").value(person.getBirthDay().toString()))
                 .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
                 .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].main").value(address.getMain()))
                 .andExpect(jsonPath("addressSet[0].zipcode").value(addressRecord.zipcode()))
                 .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
