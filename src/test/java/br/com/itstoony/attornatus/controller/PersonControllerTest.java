@@ -178,7 +178,7 @@ public class PersonControllerTest {
         Long id = 1L;
         Person person = createPerson();
         person.setId(id);
-        UpdatingPersonRecord update = new UpdatingPersonRecord("Sicrano", LocalDate.of(2000, 2, 7));
+        UpdatingPersonRecord update = new UpdatingPersonRecord("Sicrano", LocalDate.of(2000, 2, 7), "252.916.820-27");
         Address address = createAddress();
 
         Person updatedPerson = new Person(id, update.name(), "222.222.222-22", update.birthDay(), new HashSet<>());
@@ -221,7 +221,7 @@ public class PersonControllerTest {
         Long id = 1L;
         String json = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .writeValueAsString(new UpdatingPersonRecord("name", LocalDate.now()));
+                .writeValueAsString(new UpdatingPersonRecord("name", LocalDate.now(), "252.916.820-27"));
 
         BDDMockito.given(personService.findById(id)).willReturn(Optional.empty());
 
