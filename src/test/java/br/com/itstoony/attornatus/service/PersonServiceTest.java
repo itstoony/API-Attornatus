@@ -85,6 +85,20 @@ public class PersonServiceTest {
                 .isTrue();
     }
 
+    @Test
+    @DisplayName("Validates if a person exists in database by passed 'CPF'")
+    public void existsByCPFTest() {
+        // scenery
+        Person person = createPerson();
+
+        Mockito.when(personRepository.existsByCpf(person)).thenReturn(true);
+
+        // execution
+        boolean result = personService.existsByCpf(person);
+        // validation
+        assertThat(result).isTrue();
+    }
+
 
     private static Address createAddress() {
         return Address.builder()
@@ -101,14 +115,14 @@ public class PersonServiceTest {
         return Person.builder()
                 .id(1L)
                 .name("Fulano")
-                .cpf("222.222.222-22")
+                .cpf("486.031.170-12")
                 .birthDay(LocalDate.of(1998, 11, 25))
                 .addressSet(new HashSet<>())
                 .build();
     }
 
     private static RegisteringPersonRecord createRegisteringPersonDTO() {
-        return new RegisteringPersonRecord("Fulano", "222.222.222-22", LocalDate.of(1998, 11, 25), "12345678", 123 );
+        return new RegisteringPersonRecord("Fulano", "486.031.170-12", LocalDate.of(1998, 11, 25), "12345678", 123 );
     }
 
 }

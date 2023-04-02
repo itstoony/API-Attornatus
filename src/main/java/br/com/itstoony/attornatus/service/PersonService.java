@@ -62,4 +62,9 @@ public class PersonService {
     public Person setAddressAsMain(Person person, Address address) {
         return null;
     }
+
+    public boolean existsByCpf(Person person) {
+        return personRepository.existsByCpf(person);
+    }
+
 }
