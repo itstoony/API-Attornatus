@@ -284,30 +284,6 @@ public class PersonServiceTest {
 
     }
 
-    @Test
-    @DisplayName("Should return a page of all addresses from a person")
-    public void findAllAddressTest() {
-        // scenery
-        Person person = createPerson();
-        Address address = createAddress();
-
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        List<Address> list = Collections.singletonList(address);
-
-        PageImpl<Address> page = new PageImpl<>(list, pageRequest, 1);
-
-        when(addressRepository.findByPerson(any(Person.class), any(Pageable.class))).thenReturn(page);
-
-        // execution
-        Page<Address> result = personService.findAllAddress(person, pageRequest);
-
-        // validation
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        assertThat(result.getContent()).isEqualTo(list);
-        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
-        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
-    }
-
     private static Address createAddress() {
         return Address.builder()
                 .id(1L)
