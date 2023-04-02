@@ -299,6 +299,7 @@ public class PersonServiceTest {
         when(addressRepository.save(address1)).thenReturn(address1);
         when(addressRepository.save(address2)).thenReturn(address2);
         when(personRepository.save(person)).thenReturn(person);
+        when(personRepository.existsByCpf(Mockito.any(String.class))).thenReturn(true);
 
         // execution
         Person result = personService.setAddressAsMain(person, address2);
@@ -333,6 +334,7 @@ public class PersonServiceTest {
         Address address = createAddress();
         String message = "Passed address doesn't belong to passed person";
 
+        when(personRepository.existsByCpf(Mockito.any(String.class))).thenReturn(true);
         // execution
         Throwable exception = catchThrowable(() -> personService.setAddressAsMain(person, address));
 
