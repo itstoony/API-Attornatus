@@ -69,7 +69,15 @@ public class PersonService {
     }
 
     public Person addAddress(Person person, Address address) {
-        return null;
+        if (!existsByCpf(person.getCpf())) {
+            throw new BusinessException("Cannot add address to an unsaved Person");
+        }
+
+        addressRepository.save(address);
+
+        person.getAddressSet().add(address);
+
+        return personRepository.save(person);
     }
 
     public Page<Address> findAllAddress(Person person, Pageable pageable) {
