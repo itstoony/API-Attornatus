@@ -236,6 +236,54 @@ public class PersonServiceTest {
 
     }
 
+    @Test
+    @DisplayName("Should add an address to a person's set")
+    public void addAddressTest() {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        Address address = createAddress();
+
+        person.setId(id);
+        address.setId(id);
+
+        when(personRepository.existsByCpf(person.getCpf())).thenReturn(true);
+        when(addressRepository.save(address)).thenReturn(address);
+        when(personRepository.save(person)).thenReturn(person);
+
+        // execution
+        Person updatedPerson = personService.addAddress(person, address);
+
+        // validation
+        assertThat(updatedPerson.getAddressSet().contains(address)).isTrue();
+
+        verify(personRepository, times(1)).save(any(Person.class));
+        verify(addressRepository, times(1)).save(any(Address.class));
+    }
+
+    @Test
+    @DisplayName("Should throw a BusinessException when trying to add address to an unsaved Person")
+    public void addAddressToInvalidPersonTest() {
+        Long id = 1L;
+        Person person = createPerson();
+        Address address = createAddress();
+
+        person.setId(id);
+        address.setId(id);
+
+        when(personRepository.existsByCpf(person.getCpf())).thenReturn(false);
+
+        // execution
+        Throwable exception = catchThrowable(() -> personService.addAddress(person, address));
+
+        // validation
+        assertThat(exception).isInstanceOf(BusinessException.class);
+
+        verify(personRepository, never()).save(any(Person.class));
+        verify(addressRepository, never()).save(any(Address.class));
+
+    }
+
     private static Address createAddress() {
         return Address.builder()
                 .id(1L)
