@@ -45,7 +45,7 @@ public class PersonService {
     }
 
     public Optional<Person> findById(Long id) {
-        return Optional.empty();
+        return personRepository.findById(id);
     }
 
     public Person update(Person person, UpdatingPersonRecord update) {
