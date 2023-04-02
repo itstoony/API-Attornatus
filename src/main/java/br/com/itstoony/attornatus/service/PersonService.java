@@ -49,7 +49,19 @@ public class PersonService {
     }
 
     public Person update(Person person, UpdatingPersonRecord update) {
-        return null;
+        if (!existsByCpf(person.getCpf())) {
+            throw new BusinessException("Cannot update an unsaved person");
+        }
+
+        if (update.name() != null && !update.name().isBlank()) {
+            person.setName(update.name());
+        }
+
+        if (update.birthDay() != null) {
+            person.setBirthDay(update.birthDay());
+        }
+
+        return personRepository.save(person);
     }
 
     public Page<Person> find(String name, Pageable pageable) {
