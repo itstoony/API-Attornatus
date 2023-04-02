@@ -1,6 +1,7 @@
 package br.com.itstoony.attornatus.service;
 
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
+import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
 import br.com.itstoony.attornatus.exception.BusinessException;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,8 +22,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -166,6 +165,43 @@ public class PersonServiceTest {
         assertThat(foundPerson.isPresent()).isFalse();
     }
 
+    @Test
+    @DisplayName("Should update a person")
+    public void updateTest() {
+        // scenery
+        Person person = createPerson();
+        UpdatingPersonRecord update = createUpdatingPersonDTO();
+
+        when(personRepository.existsByCpf(person.getCpf())).thenReturn(true);
+        when(personRepository.save(person)).thenReturn(person);
+
+        // execution
+        Person updatedPerson = personService.update(person, update);
+
+        // validation
+        assertThat(updatedPerson.getName()).isEqualTo(update.name());
+        assertThat(updatedPerson.getBirthDay()).isEqualTo(update.birthDay());
+        verify(personRepository, times(1)).save(person);
+    }
+
+    @Test
+    @DisplayName("Should throw a BusinessException when trying to update an unsaved person")
+    public void updateUnsavedPersonTest() {
+        // scenery
+        Person person = createPerson();
+        UpdatingPersonRecord dto = createUpdatingPersonDTO();
+
+        when(personRepository.existsByCpf(person.getCpf())).thenReturn(false);
+
+        // execution
+        Throwable exception = catchThrowable(() -> personService.update(person, dto));
+
+        // validation
+        assertThat(exception).isInstanceOf(BusinessException.class);
+
+        verify(personRepository, never()).save(Mockito.any(Person.class));
+    }
+
     private static Address createAddress() {
         return Address.builder()
                 .id(1L)
@@ -176,6 +212,7 @@ public class PersonServiceTest {
                 .main(false)
                 .build();
     }
+
 
     private static Person createPerson() {
         return Person.builder()
@@ -191,4 +228,7 @@ public class PersonServiceTest {
         return new RegisteringPersonRecord("Fulano", "486.031.170-12", LocalDate.of(1998, 11, 25), "12345678", 123 );
     }
 
+    private static UpdatingPersonRecord createUpdatingPersonDTO() {
+        return new UpdatingPersonRecord("Sicrano", LocalDate.of(2002, 11, 22));
+    }
 }
