@@ -18,10 +18,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -52,9 +54,9 @@ public class PersonServiceTest {
         savedPerson.setId(1L);
         savedPerson.getAddressSet().add(address);
 
-        BDDMockito.when(addressRepository.save(Mockito.any(Address.class)))
+        when(addressRepository.save(Mockito.any(Address.class)))
                 .thenReturn(address);
-        BDDMockito.when(personRepository.save(Mockito.any(Person.class)))
+        when(personRepository.save(Mockito.any(Person.class)))
                 .thenReturn(savedPerson);
 
         // execution
@@ -100,7 +102,7 @@ public class PersonServiceTest {
         savedPerson.setId(1L);
         savedPerson.getAddressSet().add(address);
 
-        BDDMockito.when(personRepository.existsByCpf(dto.cpf())).thenReturn(true);
+        when(personRepository.existsByCpf(dto.cpf())).thenReturn(true);
 
         // execution
         Throwable exception = catchThrowable(() -> personService.register(dto, address));
@@ -119,7 +121,7 @@ public class PersonServiceTest {
         // scenery
         Person person = createPerson();
 
-        Mockito.when(personRepository.existsByCpf(person.getCpf())).thenReturn(true);
+        when(personRepository.existsByCpf(person.getCpf())).thenReturn(true);
 
         // execution
         boolean result = personService.existsByCpf(person.getCpf());
@@ -127,6 +129,42 @@ public class PersonServiceTest {
         assertThat(result).isTrue();
     }
 
+    @Test
+    @DisplayName("Should find a person by ID")
+    public void findByIdTest() {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        person.setId(id);
+
+        when(personRepository.findById(id)).thenReturn(Optional.of(person));
+
+        // execution
+        Optional<Person> foundPerson = personService.findById(id);
+
+        // validation
+        assertThat(foundPerson.isPresent()).isTrue();
+        assertThat(foundPerson.get().getId()).isEqualTo(id);
+        assertThat(foundPerson.get().getName()).isEqualTo(person.getName());
+        assertThat(foundPerson.get().getCpf()).isEqualTo(person.getCpf());
+        assertThat(foundPerson.get().getBirthDay()).isEqualTo(person.getBirthDay());
+        assertThat(foundPerson.get().getAddressSet()).isEqualTo(person.getAddressSet());
+
+    }
+
+    @Test
+    @DisplayName("Should return an empty Optional when trying to find person by invalid id")
+    public void findByInvalidIdTest() {
+        // scenery
+        Long id = 1L;
+
+        when(personRepository.findById(id)).thenReturn(Optional.empty());
+        // execution
+        Optional<Person> foundPerson = personService.findById(id);
+
+        // validation
+        assertThat(foundPerson.isPresent()).isFalse();
+    }
 
     private static Address createAddress() {
         return Address.builder()
