@@ -16,6 +16,8 @@ public class Person {
 
     private String name;
 
+    private String cpf;
+
     private LocalDate birthDay;
 
     private Set<Address> addressSet;
