@@ -186,8 +186,9 @@ public class PersonControllerTest {
                 .registerModule(new JavaTimeModule())
                 .writeValueAsString(update);
 
-        BDDMockito.given( personService.findById(id)).willReturn(Optional.of(person) );
-        BDDMockito.given( personService.update(Mockito.any(Person.class), Mockito.any(UpdatingPersonRecord.class)) ).willReturn(updatedPerson);
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.of(person));
+        BDDMockito.given(personService.update(Mockito.any(Person.class),Mockito.any(UpdatingPersonRecord.class)))
+                .willReturn(updatedPerson);
 
         // execution
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -256,11 +257,11 @@ public class PersonControllerTest {
         mvc
                 .perform(request)
                 .andExpect(status().isOk())
-                .andExpect( jsonPath("content", hasSize(1)))
-                .andExpect( jsonPath("content.[0].name").value(person.getName()))
-                .andExpect( jsonPath("totalElements").value(1))
-                .andExpect( jsonPath("pageable.pageSize").value(10))
-                .andExpect( jsonPath("pageable.pageNumber").value(0));
+                .andExpect(jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content.[0].name").value(person.getName()))
+                .andExpect(jsonPath("totalElements").value(1))
+                .andExpect(jsonPath("pageable.pageSize").value(10))
+                .andExpect(jsonPath("pageable.pageNumber").value(0));
     }
 
     @Test
@@ -327,6 +328,63 @@ public class PersonControllerTest {
     }
 
     @Test
+    @DisplayName("Should set an address as main")
+    public void setAddressAsMainTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        Address address = createAddress();
+        Person person = createPerson();
+
+        address.setId(id);
+        person.setId(id);
+        address.setMain(true);
+        person.getAddressSet().add(address);
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.of(createPerson()));
+        BDDMockito.given(addressService.findById(id)).willReturn(Optional.of(createAddress()));
+        BDDMockito.given(personService.setAddressAsMain(Mockito.any(Person.class), Mockito.any(Address.class)))
+                .willReturn(person);
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .patch(PERSON_API.concat("/" + id + "/address/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").value(id))
+                .andExpect(jsonPath("name").value(person.getName()))
+                .andExpect(jsonPath("addressSet[0].id").value(address.getId()))
+                .andExpect(jsonPath("addressSet[0].main").value(true))
+                .andExpect(jsonPath("addressSet[0].street").value(address.getStreet()))
+                .andExpect(jsonPath("addressSet[0].zipcode").value(address.getZipcode()))
+                .andExpect(jsonPath("addressSet[0].number").value(address.getNumber()))
+                .andExpect(jsonPath("addressSet[0].city").value(address.getCity()));
+    }
+
+    @Test
+    @DisplayName("Should return 404 when trying to set an unavailable address as main  ")
+    public void setUnavailableAddressAsMainTest() throws Exception {
+        // scenery
+        long id = 1L;
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.of(createPerson()));
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .patch(PERSON_API.concat("/" + id + "/address/" + id))
+                .accept(MediaType.APPLICATION_JSON);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("errors", hasSize(1)))
+                .andExpect(jsonPath("errors[0]").value("Address not found"));
+
+    }
+
+    @Test
     @DisplayName("Should return a page with all addresses from a person by it's id")
     public void findAllAddressTest() throws Exception {
         // scenery
@@ -350,15 +408,15 @@ public class PersonControllerTest {
         mvc
                 .perform(request)
                 .andExpect(status().isOk())
-                .andExpect( jsonPath("content", hasSize(1)))
+                .andExpect(jsonPath("content", hasSize(1)))
                 .andExpect(jsonPath("content[0].id").value(address.getId()))
                 .andExpect(jsonPath("content[0].street").value(address.getStreet()))
                 .andExpect(jsonPath("content[0].zipcode").value(address.getZipcode()))
                 .andExpect(jsonPath("content[0].number").value(address.getNumber()))
                 .andExpect(jsonPath("content[0].city").value(address.getCity()))
-                .andExpect( jsonPath("totalElements").value(1))
-                .andExpect( jsonPath("pageable.pageSize").value(100))
-                .andExpect( jsonPath("pageable.pageNumber").value(0));
+                .andExpect(jsonPath("totalElements").value(1))
+                .andExpect(jsonPath("pageable.pageSize").value(100))
+                .andExpect(jsonPath("pageable.pageNumber").value(0));
 
     }
 
@@ -369,6 +427,7 @@ public class PersonControllerTest {
                 .zipcode("12345678")
                 .number(123)
                 .city("São Paulo")
+                .main(false)
                 .build();
     }
 

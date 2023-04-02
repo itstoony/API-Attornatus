@@ -100,4 +100,18 @@ public class PersonController {
         return ResponseEntity.ok(personService.findAllAddress(person, pageable));
     }
 
+    @PatchMapping("{personID}/address/{addressID}")
+    public ResponseEntity<PersonDTO> setAddressAsMain(@PathVariable(name = "personID") Long personID,
+                                                      @PathVariable(name = "addressID") Long addressID) {
+        Person person = personService.findById(personID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
+
+        Address address = addressService.findById(addressID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Address not found"));
+
+        Person updatedPerson = personService.setAddressAsMain(person, address);
+
+        return ResponseEntity.ok(modelMapper.map(updatedPerson, PersonDTO.class));
+    }
+
 }

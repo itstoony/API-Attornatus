@@ -36,4 +36,8 @@ public class PersonService {
     public Page<Address> findAllAddress(Person person, Pageable pageable) {
         return null;
     }
+
+    public Person setAddressAsMain(Person person, Address address) {
+        return null;
+    }
 }
