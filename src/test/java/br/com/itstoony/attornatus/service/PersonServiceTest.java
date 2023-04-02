@@ -1,6 +1,7 @@
 package br.com.itstoony.attornatus.service;
 
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
+import br.com.itstoony.attornatus.exception.BusinessException;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.repository.AddressRepository;
@@ -19,6 +20,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -86,15 +89,40 @@ public class PersonServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw a BusinessException when trying to save a person with an already saved CPF")
+    public void saveAlreadySavedPersonTest() {
+        // scenery
+        RegisteringPersonRecord dto = createRegisteringPersonDTO();
+        Address address = createAddress();
+        address.setId(1L);
+
+        Person savedPerson = createPerson();
+        savedPerson.setId(1L);
+        savedPerson.getAddressSet().add(address);
+
+        BDDMockito.when(personRepository.existsByCpf(dto.cpf())).thenReturn(true);
+
+        // execution
+        Throwable exception = catchThrowable(() -> personService.register(dto, address));
+
+        // validation
+        assertThat(exception)
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("CPF already registered");
+
+        verify(personRepository, Mockito.never()).save(Mockito.any(Person.class));
+    }
+
+    @Test
     @DisplayName("Validates if a person exists in database by passed 'CPF'")
     public void existsByCPFTest() {
         // scenery
         Person person = createPerson();
 
-        Mockito.when(personRepository.existsByCpf(person)).thenReturn(true);
+        Mockito.when(personRepository.existsByCpf(person.getCpf())).thenReturn(true);
 
         // execution
-        boolean result = personService.existsByCpf(person);
+        boolean result = personService.existsByCpf(person.getCpf());
         // validation
         assertThat(result).isTrue();
     }

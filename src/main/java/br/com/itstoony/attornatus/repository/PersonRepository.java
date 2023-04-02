@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-    Boolean existsByCpf(Person person);
+    Boolean existsByCpf(String cpf);
 
 }

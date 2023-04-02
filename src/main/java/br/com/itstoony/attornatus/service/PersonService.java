@@ -2,6 +2,7 @@ package br.com.itstoony.attornatus.service;
 
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
 import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
+import br.com.itstoony.attornatus.exception.BusinessException;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.repository.AddressRepository;
@@ -25,8 +26,12 @@ public class PersonService {
 
 
     public Person register(RegisteringPersonRecord dto, Address address) {
-        address.setMain(true);
 
+        if (existsByCpf(dto.cpf())) {
+            throw new BusinessException("CPF already registered");
+        }
+
+        address.setMain(true);
         Person savingPerson = Person.builder()
                 .id(null)
                 .name(dto.name())
@@ -63,8 +68,8 @@ public class PersonService {
         return null;
     }
 
-    public boolean existsByCpf(Person person) {
-        return personRepository.existsByCpf(person);
+    public boolean existsByCpf(String cpf) {
+        return personRepository.existsByCpf(cpf);
     }
 
 }
