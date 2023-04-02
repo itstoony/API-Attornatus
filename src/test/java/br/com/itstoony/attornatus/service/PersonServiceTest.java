@@ -21,10 +21,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -282,6 +280,81 @@ public class PersonServiceTest {
         verify(personRepository, never()).save(any(Person.class));
         verify(addressRepository, never()).save(any(Address.class));
 
+    }
+
+    @Test
+    @DisplayName("Should set an address as main")
+    public void setAddressAsMainTest() {
+        // scenery
+        Address address1 = createAddress();
+        Address address2 = Address.builder().zipcode("22222222").build();
+
+        address1.setMain(true);
+        address2.setMain(false);
+
+        Person person = createPerson();
+        person.getAddressSet().add(address1);
+        person.getAddressSet().add(address2);
+
+        when(addressRepository.save(address1)).thenReturn(address1);
+        when(addressRepository.save(address2)).thenReturn(address2);
+        when(personRepository.save(person)).thenReturn(person);
+
+        // execution
+        Person result = personService.setAddressAsMain(person, address2);
+
+        // validation
+        assertThat(result.getAddressSet().contains(address1)).isTrue();
+        assertThat(result.getAddressSet().contains(address2)).isTrue();
+
+        assertThat(result.getAddressSet()
+                .stream()
+                .filter( a -> Objects.equals(a.getZipcode(), address1.getZipcode()))
+                .toList()
+                .get(0)
+                .getMain()).isFalse();
+
+        assertThat(result.getAddressSet()
+                .stream()
+                .filter( a -> Objects.equals(a.getZipcode(), address2.getZipcode()))
+                .toList()
+                .get(0)
+                .getMain()).isTrue();
+
+        verify(addressRepository, times(1)).save(any(Address.class));
+        verify(personRepository, times(1)).save(any(Person.class));
+    }
+
+    @Test
+    @DisplayName("Should throw an BusinessException when passed Address doesn't belong to passed Person")
+    public void setInvalidAddressAsMainTest() {
+        // scenery
+        Person person = createPerson();
+        Address address = createAddress();
+        String message = "Passed address doesn't belong to passed person";
+
+        // execution
+        Throwable exception = catchThrowable(() -> personService.setAddressAsMain(person, address));
+
+        // validation
+        assertThat(exception).isInstanceOf(BusinessException.class);
+        assertThat(exception).hasMessage(message);
+    }
+
+    @Test
+    @DisplayName("Should throw a BusinessException when Person is not saved")
+    public void setNullAddressAsMainTest() {
+        // scenery
+        Person person = createPerson();
+        Address address = Address.builder().build();
+        String message = "Person not saved";
+
+        // execution
+        Throwable exception = catchThrowable(() -> personService.setAddressAsMain(person, address));
+
+        // validation
+        assertThat(exception).isInstanceOf(BusinessException.class);
+        assertThat(exception).hasMessage(message);
     }
 
     private static Address createAddress() {
