@@ -13,15 +13,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -53,9 +60,9 @@ public class PersonServiceTest {
         savedPerson.setId(1L);
         savedPerson.getAddressSet().add(address);
 
-        when(addressRepository.save(Mockito.any(Address.class)))
+        when(addressRepository.save(any(Address.class)))
                 .thenReturn(address);
-        when(personRepository.save(Mockito.any(Person.class)))
+        when(personRepository.save(any(Person.class)))
                 .thenReturn(savedPerson);
 
         // execution
@@ -111,7 +118,7 @@ public class PersonServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("CPF already registered");
 
-        verify(personRepository, Mockito.never()).save(Mockito.any(Person.class));
+        verify(personRepository, Mockito.never()).save(any(Person.class));
     }
 
     @Test
@@ -199,7 +206,34 @@ public class PersonServiceTest {
         // validation
         assertThat(exception).isInstanceOf(BusinessException.class);
 
-        verify(personRepository, never()).save(Mockito.any(Person.class));
+        verify(personRepository, never()).save(any(Person.class));
+    }
+
+    @Test
+    @DisplayName("Should find person filtering by name ")
+    public void findTest() {
+        // scenery
+        String name = createPerson().getName();
+        Person person = createPerson();
+        person.setId(1L);
+
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<Person> list = Collections.singletonList(person);
+
+        PageImpl<Person> page = new PageImpl<>(list, pageRequest, 1);
+
+        when(personRepository.findByName(any(String.class), any(Pageable.class))).thenReturn(page);
+
+        // execution
+        Page<Person> result = personService.find(name, pageRequest);
+
+        // validation
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent()).isEqualTo(list);
+        assertThat(result.getPageable().getPageNumber()).isEqualTo(0);
+        assertThat(result.getPageable().getPageSize()).isEqualTo(10);
+
     }
 
     private static Address createAddress() {

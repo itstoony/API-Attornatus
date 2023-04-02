@@ -65,7 +65,7 @@ public class PersonService {
     }
 
     public Page<Person> find(String name, Pageable pageable) {
-        return null;
+        return personRepository.findByName(name, pageable);
     }
 
     public Person addAddress(Person person, Address address) {
