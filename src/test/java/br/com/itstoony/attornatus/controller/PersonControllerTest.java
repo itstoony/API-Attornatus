@@ -99,7 +99,7 @@ public class PersonControllerTest {
     @DisplayName("Should return 400 Bad Request when trying to register a person without sufficient data")
     public void registerInvalidPersonTest() throws Exception {
         // scenery
-        RegisteringPersonRecord dto = new RegisteringPersonRecord("", null, "", 10);
+        RegisteringPersonRecord dto = new RegisteringPersonRecord("", "", null, "", 10);
 
         String json = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
@@ -116,7 +116,7 @@ public class PersonControllerTest {
         mvc
                 .perform(request)
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errors", hasSize(4)));
+                .andExpect(jsonPath("errors", hasSize(6)));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class PersonControllerTest {
         UpdatingPersonRecord update = new UpdatingPersonRecord("Sicrano", LocalDate.of(2000, 2, 7));
         Address address = createAddress();
 
-        Person updatedPerson = new Person(id, update.name(), update.birthDay(), new HashSet<>());
+        Person updatedPerson = new Person(id, update.name(), "222.222.222-22", update.birthDay(), new HashSet<>());
         updatedPerson.getAddressSet().add(address);
 
         String json = new ObjectMapper()
@@ -445,6 +445,6 @@ public class PersonControllerTest {
     }
 
     private static RegisteringPersonRecord createRegisteringPersonDTO() {
-        return new RegisteringPersonRecord("Fulano", LocalDate.of(1998, 11, 25), "22222222", 10 );
+        return new RegisteringPersonRecord("Fulano", "486.031.170-12", LocalDate.of(1998, 11, 25), "22222222", 10 );
     }
 }

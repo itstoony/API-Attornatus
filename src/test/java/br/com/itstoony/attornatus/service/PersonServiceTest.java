@@ -60,8 +60,9 @@ public class PersonServiceTest {
         // implementation
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getName()).isEqualTo(dto.name());
+        assertThat(saved.getCpf()).isEqualTo(dto.cpf());
         assertThat(saved.getBirthDay()).isEqualTo(dto.birthDay());
-        assertThat(saved.getAddressSet().isEmpty()).isFalse();
+        assertThat(saved.getAddressSet().contains(address)).isTrue();
 
         assertThat(saved.getAddressSet()
                 .stream()
@@ -84,6 +85,7 @@ public class PersonServiceTest {
                 .isTrue();
     }
 
+
     private static Address createAddress() {
         return Address.builder()
                 .id(1L)
@@ -99,13 +101,14 @@ public class PersonServiceTest {
         return Person.builder()
                 .id(1L)
                 .name("Fulano")
+                .cpf("222.222.222-22")
                 .birthDay(LocalDate.of(1998, 11, 25))
                 .addressSet(new HashSet<>())
                 .build();
     }
 
     private static RegisteringPersonRecord createRegisteringPersonDTO() {
-        return new RegisteringPersonRecord("Fulano", LocalDate.of(1998, 11, 25), "12345678", 123 );
+        return new RegisteringPersonRecord("Fulano", "222.222.222-22", LocalDate.of(1998, 11, 25), "12345678", 123 );
     }
 
 }
