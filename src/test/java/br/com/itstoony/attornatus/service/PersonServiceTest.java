@@ -256,7 +256,7 @@ public class PersonServiceTest {
         assertThat(updatedPerson.getAddressSet().contains(address)).isTrue();
 
         verify(personRepository, times(1)).save(any(Person.class));
-        verify(addressRepository, times(1)).save(any(Address.class));
+        verify(addressRepository, times(2)).save(any(Address.class));
     }
 
     @Test
@@ -386,6 +386,6 @@ public class PersonServiceTest {
     }
 
     private static UpdatingPersonRecord createUpdatingPersonDTO() {
-        return new UpdatingPersonRecord("Sicrano", LocalDate.of(2002, 11, 22));
+        return new UpdatingPersonRecord("Sicrano", LocalDate.of(2002, 11, 22), "252.916.820-27");
     }
 }
