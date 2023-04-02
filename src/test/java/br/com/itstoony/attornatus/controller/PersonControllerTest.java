@@ -70,7 +70,7 @@ public class PersonControllerTest {
                 .registerModule(new JavaTimeModule())
                 .writeValueAsString(dto);
 
-        BDDMockito.given(addressService.findByZipcode(dto.zipcode())).willReturn(address);
+        BDDMockito.given(addressService.findFromDTO(dto)).willReturn(address);
         BDDMockito.given(personService.register(Mockito.any(RegisteringPersonRecord.class), Mockito.any(Address.class))).willReturn(savedPerson);
 
         // execution
@@ -285,7 +285,7 @@ public class PersonControllerTest {
         BDDMockito.given(personService.findById(id)).willReturn(Optional.of(person));
         BDDMockito.given(personService.addAddress(Mockito.any(Person.class), Mockito.any(Address.class)))
                 .willReturn(updatedPerson);
-        BDDMockito.given(addressService.findByZipcode(addressRecord.zipcode())).willReturn(address);
+        BDDMockito.given(addressService.findFromDTO(addressRecord)).willReturn(address);
 
         // execution
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders
@@ -401,7 +401,7 @@ public class PersonControllerTest {
         updatedPerson.getAddressSet().add(address);
 
         BDDMockito.given(personService.findById(id)).willReturn(Optional.of(person));
-        BDDMockito.given(personService.findAllAddress(Mockito.any(Person.class), Mockito.any(Pageable.class)))
+        BDDMockito.given(addressService.findAllAddress(Mockito.any(Person.class), Mockito.any(Pageable.class)))
                 .willReturn(new PageImpl<>(Collections.singletonList(address), Pageable.ofSize(100), 1));
         // execution
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders

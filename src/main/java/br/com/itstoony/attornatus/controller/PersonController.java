@@ -38,7 +38,7 @@ public class PersonController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PersonDTO> register(@RequestBody @Valid RegisteringPersonRecord dto) {
-        Address address = addressService.findByZipcode(dto.zipcode());
+        Address address = addressService.findFromDTO(dto);
         Person savedPerson = personService.register(dto, address);
         PersonDTO personDTO = modelMapper.map(savedPerson, PersonDTO.class);
 
@@ -86,7 +86,7 @@ public class PersonController {
         Person person = personService
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
-        Address address = addressService.findByZipcode(dto.zipcode());
+        Address address = addressService.findFromDTO(dto);
 
         Person updatedPerson = personService.addAddress(person, address);
 
@@ -97,7 +97,7 @@ public class PersonController {
     public ResponseEntity<Page<Address>> listAllAddress(@PathVariable(name = "id") Long id,
                                                         Pageable pageable) {
         Person person = personService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
-        return ResponseEntity.ok(personService.findAllAddress(person, pageable));
+        return ResponseEntity.ok(addressService.findAllAddress(person, pageable));
     }
 
     @PatchMapping("{personID}/address/{addressID}")

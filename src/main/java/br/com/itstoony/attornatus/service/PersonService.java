@@ -80,10 +80,6 @@ public class PersonService {
         return personRepository.save(person);
     }
 
-    public Page<Address> findAllAddress(Person person, Pageable pageable) {
-        return addressRepository.findByPerson(person, pageable);
-    }
-
     public Person setAddressAsMain(Person person, Address address) {
         return null;
     }
