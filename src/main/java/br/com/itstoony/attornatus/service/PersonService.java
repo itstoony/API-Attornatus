@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +82,21 @@ public class PersonService {
     }
 
     public Person setAddressAsMain(Person person, Address address) {
-        return null;
+        if (!existsByCpf(person.getCpf())) {
+            throw new BusinessException("Person not saved");
+        }
+
+        if (!person.getAddressSet().contains(address)) {
+            throw new BusinessException("Passed address doesn't belong to passed person");
+        }
+
+        Set<Address> addressSet = person.getAddressSet();
+        addressSet.forEach(a -> a.setMain(false));
+
+        address.setMain(true);
+
+        addressRepository.save(address);
+        return personRepository.save(person);
     }
 
     public boolean existsByCpf(String cpf) {
