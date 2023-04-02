@@ -37,12 +37,18 @@ public class PersonService {
                 .id(null)
                 .name(dto.name())
                 .birthDay(dto.birthDay())
+                .cpf(dto.cpf())
                 .addressSet(new HashSet<>(List.of(address)))
                 .build();
 
         addressRepository.save(address);
 
-        return personRepository.save(savingPerson);
+        Person savedPerson = personRepository.save(savingPerson);
+
+        address.setPerson(savedPerson);
+
+        addressRepository.save(address);
+        return savedPerson;
     }
 
     public Optional<Person> findById(Long id) {
@@ -62,6 +68,10 @@ public class PersonService {
             person.setBirthDay(update.birthDay());
         }
 
+        if (!update.cpf().isBlank()) {
+            person.setCpf(update.cpf());
+        }
+
         return personRepository.save(person);
     }
 
@@ -78,6 +88,9 @@ public class PersonService {
 
         person.getAddressSet().add(address);
 
+        address.setPerson(person);
+
+        addressRepository.save(address);
         return personRepository.save(person);
     }
 

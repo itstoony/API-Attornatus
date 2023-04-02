@@ -69,7 +69,7 @@ public class PersonController {
         return ResponseEntity.ok(modelMapper.map(updatedPerson, PersonDTO.class));
     }
 
-    @GetMapping
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<PersonDTO>> find(@PathParam("name") String name, Pageable pageable) {
         Page<Person> page = personService.find(name, pageable);
         List<PersonDTO> listDTO = page.stream().map(person -> modelMapper.map(person, PersonDTO.class)).toList();
@@ -79,7 +79,7 @@ public class PersonController {
         return ResponseEntity.ok(pageDTO);
     }
 
-    @PostMapping("{id}/address")
+    @PostMapping(value = "{id}/address", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PersonDTO> addAddress(@PathVariable(name = "id") Long id,
                                               @RequestBody @Valid AddressRecord dto) {
 
@@ -93,14 +93,14 @@ public class PersonController {
         return ResponseEntity.ok(modelMapper.map(updatedPerson, PersonDTO.class));
     }
 
-    @GetMapping("{id}/address")
+    @GetMapping(value = "{id}/address", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Page<Address>> listAllAddress(@PathVariable(name = "id") Long id,
                                                         Pageable pageable) {
         Person person = personService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
         return ResponseEntity.ok(addressService.findAllAddress(person, pageable));
     }
 
-    @PatchMapping("{personID}/address/{addressID}")
+    @PatchMapping(value = "{personID}/address/{addressID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PersonDTO> setAddressAsMain(@PathVariable(name = "personID") Long personID,
                                                       @PathVariable(name = "addressID") Long addressID) {
         Person person = personService.findById(personID)
