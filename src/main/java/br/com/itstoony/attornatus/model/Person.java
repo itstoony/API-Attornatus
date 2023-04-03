@@ -27,7 +27,7 @@ public class Person {
     @Column(name = "birth_day")
     private LocalDate birthDay;
 
-    @OneToMany
+    @OneToMany(mappedBy = "person")
     private Set<Address> addressSet;
 
 }
