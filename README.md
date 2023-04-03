@@ -15,10 +15,17 @@
 * ModelMapper
 * Banco de Dados H2
 * Maven
+* Jacoco
 * Swagger OpenAPI
+
+<hr>
 
 * Projeto inteiramente desenvolvido sob TDD.
 * Consome o Web Serviço "https://viacep.com.br/" para consultar de CEP.
+* Acessar "http://localhost:8080/actuator/logfile" para LOG's da aplicação
+* Rodar "mvn test" para execução de testes.
+* Acessar "http://localhost:8080/swagger-ui/index.html" para Documentação Swagger-ui.
+
 
 <hr>
 
