@@ -15,6 +15,7 @@
 * ModelMapper
 * Banco de Dados H2
 * Maven
+* Swagger OpenAPI
 
 * Projeto inteiramente desenvolvido sob TDD.
 
