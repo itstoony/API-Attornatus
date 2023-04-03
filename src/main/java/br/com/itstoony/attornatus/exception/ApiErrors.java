@@ -20,6 +20,10 @@ public class ApiErrors {
         this.errors = Collections.singletonList(ex.getReason());
     }
 
+    public ApiErrors(BusinessException ex) {
+        this.errors = Collections.singletonList(ex.getMessage());
+    }
+
     public List<String> getErrors() {
         return errors;
     }
