@@ -8,6 +8,10 @@ import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.service.AddressService;
 import br.com.itstoony.attornatus.service.PersonService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/person")
 @RequiredArgsConstructor
+@Tag(name = "Person", description = "API responsible for Person management")
 public class PersonController {
 
     private final PersonService personService;
@@ -37,6 +42,11 @@ public class PersonController {
     private final AddressService addressService;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create a person")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Person registered successfully."),
+            @ApiResponse(responseCode = "400", description = "Failed to register a person.")
+    })
     public ResponseEntity<PersonDTO> register(@RequestBody @Valid RegisteringPersonRecord dto) {
         Address address = addressService.findFromDTO(dto);
         Person savedPerson = personService.register(dto, address);
@@ -49,6 +59,11 @@ public class PersonController {
     }
 
     @GetMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Get details of a person by id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Person details successfully obtained."),
+            @ApiResponse(responseCode = "400", description = "Failed to get person details.")
+    })
     public ResponseEntity<PersonDTO> findById(@PathVariable(name = "id") Long id) {
         Person foundPerson = personService
                 .findById(id)
@@ -58,6 +73,11 @@ public class PersonController {
     }
 
     @PutMapping(value = "{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Update a person.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Person successfully updated."),
+            @ApiResponse(responseCode = "400", description = "Failed to update person.")
+    })
     public ResponseEntity<PersonDTO> update(@PathVariable(name = "id") Long id,
                                             @RequestBody UpdatingPersonRecord update) {
         Person person = personService
@@ -70,6 +90,11 @@ public class PersonController {
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Find people by params.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found people by parameters successfully obtained."),
+            @ApiResponse(responseCode = "400", description = "Failed to find people by parameters.")
+    })
     public ResponseEntity<Page<PersonDTO>> find(@PathParam("name") String name, Pageable pageable) {
         Page<Person> page = personService.find(name, pageable);
         List<PersonDTO> listDTO = page.stream().map(person -> modelMapper.map(person, PersonDTO.class)).toList();
@@ -80,6 +105,11 @@ public class PersonController {
     }
 
     @PostMapping(value = "{id}/address", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Add a new address to a person")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Address added successfully."),
+            @ApiResponse(responseCode = "400", description = "Failed to add address.")
+    })
     public ResponseEntity<PersonDTO> addAddress(@PathVariable(name = "id") Long id,
                                               @RequestBody @Valid AddressRecord dto) {
 
@@ -94,6 +124,11 @@ public class PersonController {
     }
 
     @GetMapping(value = "{id}/address", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Find all addresses from person.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found addresses by person successfully obtained."),
+            @ApiResponse(responseCode = "400", description = "Failed to find addresses by person .")
+    })
     public ResponseEntity<Page<Address>> listAllAddress(@PathVariable(name = "id") Long id,
                                                         Pageable pageable) {
         Person person = personService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
@@ -101,6 +136,11 @@ public class PersonController {
     }
 
     @PatchMapping(value = "{personID}/address/{addressID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Set address as main.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Address set as main successfully."),
+            @ApiResponse(responseCode = "400", description = "Failed to set address as main.")
+    })
     public ResponseEntity<PersonDTO> setAddressAsMain(@PathVariable(name = "personID") Long personID,
                                                       @PathVariable(name = "addressID") Long addressID) {
         Person person = personService.findById(personID)
