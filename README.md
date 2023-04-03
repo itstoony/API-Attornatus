@@ -3,12 +3,20 @@
 <div align = "center">
 <h3><b>## Desafio Attornatus</b></h3></div>
 
-    ### Objetivo:
+    ### Tecnologias e bibliotecas utilizadas:
 
-* Realização do Desafio Backend Java Attornatus;
-* Linguagem : Java - API Rest;
-* Ferramenta: IntelliJ;
-* TDD;
+* Java 17
+* Spring Boot
+* Spring Data JPA
+* Spring Cloud Open Feign
+* JUnit 5
+* Mockito
+* Lombok
+* ModelMapper
+* Banco de Dados H2
+* Maven
+
+* Projeto inteiramente desenvolvido sob TDD.
 
 <hr>
 
