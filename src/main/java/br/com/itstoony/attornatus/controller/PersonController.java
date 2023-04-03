@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +34,7 @@ import java.util.List;
 @RequestMapping("/person")
 @RequiredArgsConstructor
 @Tag(name = "Person", description = "API responsible for Person management")
+@Slf4j
 public class PersonController {
 
     private final PersonService personService;
@@ -48,6 +50,7 @@ public class PersonController {
             @ApiResponse(responseCode = "400", description = "Failed to register a person.")
     })
     public ResponseEntity<PersonDTO> register(@RequestBody @Valid RegisteringPersonRecord dto) {
+        log.info("Registering Person with CPF: {}", dto.cpf());
         Address address = addressService.findFromDTO(dto);
         Person savedPerson = personService.register(dto, address);
         PersonDTO personDTO = modelMapper.map(savedPerson, PersonDTO.class);
@@ -65,6 +68,7 @@ public class PersonController {
             @ApiResponse(responseCode = "400", description = "Failed to get person details.")
     })
     public ResponseEntity<PersonDTO> findById(@PathVariable(name = "id") Long id) {
+        log.info("Obtaining person for id: {}", id);
         Person foundPerson = personService
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
@@ -80,6 +84,7 @@ public class PersonController {
     })
     public ResponseEntity<PersonDTO> update(@PathVariable(name = "id") Long id,
                                             @RequestBody UpdatingPersonRecord update) {
+        log.info("Updating Person for id: {}", id);
         Person person = personService
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
@@ -96,6 +101,7 @@ public class PersonController {
             @ApiResponse(responseCode = "400", description = "Failed to find people by parameters.")
     })
     public ResponseEntity<Page<PersonDTO>> find(@PathParam("name") String name, Pageable pageable) {
+        log.info("Finding people by name: {}", name);
         Page<Person> page = personService.find(name, pageable);
         List<PersonDTO> listDTO = page.stream().map(person -> modelMapper.map(person, PersonDTO.class)).toList();
 
@@ -112,6 +118,7 @@ public class PersonController {
     })
     public ResponseEntity<PersonDTO> addAddress(@PathVariable(name = "id") Long id,
                                               @RequestBody @Valid AddressRecord dto) {
+        log.info("Adding address for person with id: {}", id);
 
         Person person = personService
                 .findById(id)
@@ -131,6 +138,7 @@ public class PersonController {
     })
     public ResponseEntity<Page<Address>> listAllAddress(@PathVariable(name = "id") Long id,
                                                         Pageable pageable) {
+        log.info("Listing all addresses from Person with id: {}", id);
         Person person = personService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Person not found"));
         return ResponseEntity.ok(addressService.findAllAddress(person, pageable));
     }
