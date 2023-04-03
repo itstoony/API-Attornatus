@@ -18,6 +18,7 @@
 * Swagger OpenAPI
 
 * Projeto inteiramente desenvolvido sob TDD.
+* Consome o Web Serviço "https://viacep.com.br/" para consultar de CEP.
 
 <hr>
 
