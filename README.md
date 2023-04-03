@@ -17,6 +17,7 @@
 * Maven
 * Jacoco
 * Swagger OpenAPI
+* MySQL
 
 <hr>
 
@@ -24,7 +25,11 @@
 * Consome o Web Serviço "https://viacep.com.br/" para consultar de CEP.
 * Acessar "http://localhost:8080/actuator/logfile" para LOG's da aplicação
 * Rodar "mvn test" para execução de testes.
-* Acessar "http://localhost:8080/swagger-ui/index.html" para Documentação Swagger-ui.
+* Acessar "http://localhost:8080/swagger-ui/index.html" para Documentação Swagger-ui (localmente).
+* Deployment da aplicação em Nuvem disponível em: https://attornatus.up.railway.app/
+* Documentação em Nuvem: https://attornatus.up.railway.app/swagger-ui/index.html
+<h4>Caso utilizar localmente, alterar o arquivo application.properties: "spring.profiles.active=prod" para "spring.profiles.active=dev"</h4>
+
 
 
 <hr>
