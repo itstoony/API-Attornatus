@@ -1,6 +1,7 @@
 package br.com.itstoony.attornatus.controller;
 
 import br.com.itstoony.attornatus.exception.ApiErrors;
+import br.com.itstoony.attornatus.exception.BusinessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -24,6 +25,12 @@ public class PersonControllerAdvice {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleResponseStatusExceptions(ResponseStatusException ex) {
         return new ResponseEntity<>(new ApiErrors(ex), ex.getStatusCode());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrors handleBusinessExceptions(BusinessException ex) {
+        return new ApiErrors(ex);
     }
 
 }
