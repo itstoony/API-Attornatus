@@ -22,7 +22,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -205,6 +204,26 @@ public class PersonServiceTest {
         assertThat(exception).isInstanceOf(BusinessException.class);
 
         verify(personRepository, never()).save(any(Person.class));
+    }
+
+    @Test
+    @DisplayName("Should throw BusinessException when trying to update person with an already saved CPF")
+    public void updateAlreadySavedCPFTest() {
+        // scenery
+        Person person = createPerson();
+        UpdatingPersonRecord update = createUpdatingPersonDTO();
+
+        when(personRepository.existsByCpf(update.cpf())).thenReturn(true);
+        when(personRepository.existsByCpf(person.getCpf())).thenReturn(true);
+        when(personRepository.save(person)).thenReturn(person);
+
+        // execution
+        Throwable exception = catchThrowable(() -> personService.update(person, update));
+        // validation
+        assertThat(exception).isInstanceOf(BusinessException.class);
+        assertThat(exception).hasMessage("Passed CPF belongs an already saved person");
+
+        verify(personRepository, never()).save(person);
     }
 
     @Test

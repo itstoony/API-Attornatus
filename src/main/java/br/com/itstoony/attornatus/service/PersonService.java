@@ -56,8 +56,13 @@ public class PersonService {
     }
 
     public Person update(Person person, UpdatingPersonRecord update) {
+
         if (!existsByCpf(person.getCpf())) {
             throw new BusinessException("Cannot update an unsaved person");
+        }
+
+        if (existsByCpf(update.cpf())) {
+            throw new BusinessException("Passed CPF belongs an already saved person");
         }
 
         if (update.name() != null && !update.name().isBlank()) {

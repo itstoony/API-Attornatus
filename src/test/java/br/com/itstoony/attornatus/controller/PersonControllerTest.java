@@ -3,6 +3,7 @@ package br.com.itstoony.attornatus.controller;
 import br.com.itstoony.attornatus.dto.AddressRecord;
 import br.com.itstoony.attornatus.dto.RegisteringPersonRecord;
 import br.com.itstoony.attornatus.dto.UpdatingPersonRecord;
+import br.com.itstoony.attornatus.exception.BusinessException;
 import br.com.itstoony.attornatus.model.Address;
 import br.com.itstoony.attornatus.model.Person;
 import br.com.itstoony.attornatus.service.AddressService;
@@ -237,6 +238,41 @@ public class PersonControllerTest {
         mvc
                 .perform(request)
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when trying to update with an already saved CPF")
+    public void updateAlreadySavedCPFTest() throws Exception {
+        // scenery
+        Long id = 1L;
+        Person person = createPerson();
+        person.setId(id);
+        UpdatingPersonRecord update = new UpdatingPersonRecord("Sicrano", LocalDate.of(2000, 2, 7), "252.916.820-27");
+        Address address = createAddress();
+
+        Person updatedPerson = new Person(id, update.name(), "222.222.222-22", update.birthDay(), new HashSet<>());
+        updatedPerson.getAddressSet().add(address);
+
+        String json = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValueAsString(update);
+
+        BDDMockito.given(personService.findById(id)).willReturn(Optional.of(person));
+        BDDMockito.given(personService.update(Mockito.any(Person.class), Mockito.any(UpdatingPersonRecord.class)))
+                .willThrow(BusinessException.class);
+
+        // execution
+        MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+                .put(PERSON_API.concat("/" + id))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json);
+
+        // validation
+        mvc
+                .perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors", hasSize(1)));
     }
 
     @Test
