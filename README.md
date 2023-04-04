@@ -28,7 +28,7 @@
 * Acessar "http://localhost:8080/swagger-ui/index.html" para Documentação Swagger-ui (localmente).
 * Deployment da aplicação em Nuvem disponível em: https://attornatus.up.railway.app/
 * Documentação em Nuvem: https://attornatus.up.railway.app/swagger-ui/index.html
-<h4>Caso utilizar localmente, alterar o arquivo application.properties: "spring.profiles.active=prod" para "spring.profiles.active=dev"</h4>
+<h4>Caso utilizar localmente, faça o git clone direto da branch master</h4>
 
 
 
